@@ -7,8 +7,10 @@ var btnTweet = $('#tweet'),
     btnLogin = $('#login'),
     btnLogout = $('#logout'),
     chkActive = $('#active'),
-    nmbrInterval = $('#interval') 
+    nmbrInterval = $('#interval'), 
     chkReshedule = $('#reshedule'),
+    txtBitlyLogin = $('#bitly_login'),
+    txtBitlySecret = $('#bitly_secret'),
     txtContent = $('#content'),
     tweetList = $('#tweets'),
     spnChars = $('#chars'),
@@ -63,6 +65,9 @@ function createOrLoadUser(authData){
         birdcage.user = user;
         chkActive.prop('checked', user.active);
         chkReshedule.prop('checked', user.reshedule);
+        nmbrInterval.val(user.post_interval);
+        txtBitlyLogin.val(birdcage.user.bitly_login),
+        txtBitlySecret.val(birdcage.user.bitly_secret)        
     });
 }
 
@@ -70,7 +75,9 @@ function saveUserData() {
     ref.child("users/" + birdcage.uid).update({
         active: chkActive.prop('checked'),
         reshedule: chkReshedule.prop('checked'),
-        post_interval: nmbrInterval.val()
+        post_interval: nmbrInterval.val(),
+        bitly_login: txtBitlyLogin.val(),
+        bitly_secret: txtBitlySecret.val()
         });
 }
 
@@ -116,12 +123,9 @@ function updateLength(){
 function shorten() {
     var url = parseUrl()
     
-    var bitly_login = "jbandi";
-    var bitly_api_key = "R_148e579c3fce39c2aac1d4bf4b38ac59";
-
     if (url) {
         $.ajax({
-            url: "http://api.bitly.com/v3/shorten?login=" + bitly_login + "&apiKey=" + bitly_api_key + "&longUrl=" + url,
+            url: "http://api.bitly.com/v3/shorten?login=" + birdcage.user.bitly_login + "&apiKey=" + birdcage.user.bitly_secret + "&longUrl=" + url,
             dataType: "jsonp",
             success: function(result) {
                 var short_url = result["data"]["url"];
