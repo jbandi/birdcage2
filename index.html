@@ -6,9 +6,23 @@
 </head>
 <body>
 
+<span id="username"></span>
+<button id="login">Login</button>
+<button id="logout">Logout</button>
+<br>
+Active: 
+<input type="checkbox" id="active">
+Interval: 
+<input type="number" id="interval">
+Reshedule: 
+<input type="checkbox" id="reshedule">
+<br>
+
 <form>
     <textarea name="content" id="content" cols="30" rows="10"></textarea>
+    <br>
     <button id="tweet" type="button">Send!</button>
+    <span id="chars">140</span>
 </form>
 
 <ul id="tweets">
