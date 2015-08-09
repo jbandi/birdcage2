@@ -103,7 +103,7 @@ function loadPosts(){
 
 function tweet() {
     ref.child('posts/' + birdcage.uid).push({
-            content: txtContent.val() + new Date(),
+            content: txtContent.val(),
             '.priority': Date.now(),
             sent_count: 0
         }
