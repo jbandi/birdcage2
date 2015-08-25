@@ -2,132 +2,113 @@ FIREBASE_BASE = 'https://scorching-inferno-3523.firebaseio.com';
 
 var ref = new Firebase("https://scorching-inferno-3523.firebaseio.com");
 
+
+
 var btnTweet = $('#tweet'),
+    btnRandomize = $('#randomize'),
     spnUsername = $('#username'),
     btnLogin = $('#login'),
     btnLogout = $('#logout'),
     chkActive = $('#active'),
-    nmbrInterval = $('#interval'), 
+    nmbrInterval = $('#interval'),
     chkReshedule = $('#reshedule'),
     txtBitlyLogin = $('#bitly_login'),
     txtBitlySecret = $('#bitly_secret'),
     txtContent = $('#content'),
     tweetList = $('#tweets'),
-    spnChars = $('#chars'),
-    birdcage = {};
+    spnChars = $('#chars');
+
+
+birdcage2.init()
+    .then(renderUserData);
+    
+birdcage2.onTweetsChange(renderTweets);
 
 btnLogin.on('click', login);
 btnLogout.on('click', logout);
 btnTweet.on('click', tweet);
+btnRandomize.on('click', randomize);
 chkActive.on('change', saveUserData);
 chkReshedule.on('change', saveUserData);
 nmbrInterval.on('blur', saveUserData);
 txtContent.on('keyup', updateLength);
 txtContent.on('blur', contentChanged);
 
-login();
-
-function login(){
-  ref.authWithOAuthPopup("twitter", function(error, authData) {
-      if (error) {
-        console.log("Login Failed!", error);
-      } 
-      else {
-        console.log("Authenticated successfully with payload:", authData);
-        spnUsername.text(authData.twitter.username);
-        birdcage.uid = authData.uid;
-        createOrLoadUser(authData);
-        loadPosts();    
-      }
-    }, 
-    {remember: "none"}
-    )
+function renderUserData() {
+    var user = birdcage2.getUser();
+    spnUsername.text(user.username);
+    chkActive.prop('checked', user.active);
+    chkReshedule.prop('checked', user.reshedule);
+    nmbrInterval.val(user.post_interval);
+    txtBitlyLogin.val(user.bitly_login);
+    txtBitlySecret.val(user.bitly_secret);
 }
 
-function createOrLoadUser(authData){
-    ref.child("users/" + birdcage.uid).once("value", function(snapshot){
-        console.log("Loaded user!");
-        var user = snapshot.val();
-        
-        if(!user){
-            console.log("Creating user!");
-            
-            user = {
-                access_token: authData.twitter.accessToken,
-                access_token_secret: authData.twitter.accessTokenSecret,
-                active: false,
-                reshedule: false,
-                uid: authData.uid
-            }
-            
-            ref.child('users/' + birdcage.uid).set(user);
+function renderTweets(tweets) {
+    // var tweets = birdcage2.getTweets();
+    
+    tweetList.empty();
+    $.each(tweets, function (index, tweet) {
+
+        var li = $('<li>').html('(' + tweet['.priority'] + ') ' + Autolinker.link(tweet.content));
+
+        if (index > 0) {
+            var upButton = $('<button>').text('up');
+            upButton.on('click', function () {
+                birdcage2.increasePriority(tweet);
+            });
+
+            li.append(upButton);
         }
-        birdcage.user = user;
-        chkActive.prop('checked', user.active);
-        chkReshedule.prop('checked', user.reshedule);
-        nmbrInterval.val(user.post_interval);
-        txtBitlyLogin.val(birdcage.user.bitly_login),
-        txtBitlySecret.val(birdcage.user.bitly_secret)        
+
+        var deleteButton = $('<button>').text('delete');
+        deleteButton.on('click', function () {
+            birdcage2.deleteTweetById(tweet.id);
+        });
+        li.append(deleteButton);
+
+        li.appendTo(tweetList);
     });
 }
 
 function saveUserData() {
-    ref.child("users/" + birdcage.uid).update({
+    var userData = {
         active: chkActive.prop('checked'),
         reshedule: chkReshedule.prop('checked'),
         post_interval: nmbrInterval.val(),
         bitly_login: txtBitlyLogin.val(),
         bitly_secret: txtBitlySecret.val()
-        });
-}
+    };
 
-
-function loadPosts(){
-    ref.child("posts/" + birdcage.uid).orderByPriority().startAt(2).on("value", function(snapshot) {
-    console.log(snapshot.val());
-
-    tweetList.empty();
-    var tweets = snapshot.val();
-    $.each(tweets, function(id, tweet){
-
-        var upButton = $('<button>').text('up');
-        upButton.on('click', function(){alert('up')})
-
-        $('<li>')
-            .text(tweet.content)
-            .append(upButton)
-            .appendTo(tweetList);
-        })
-    });
+    birdcage2.updateUser(userData)
 }
 
 function tweet() {
-    ref.child('posts/' + birdcage.uid).push({
-            content: txtContent.val(),
-            '.priority': Date.now(),
-            sent_count: 0
-        }
-    )
+    birdcage2.postTweet(txtContent.val());
 }
 
-function contentChanged(){
+function randomize(){
+    birdcage2.randomize();
+}
+
+function contentChanged() {
     updateLength();
     shorten();
 }
 
-function updateLength(){
+function updateLength() {
     var remaining = 140 - txtContent.val().length;
     spnChars.text(remaining);
 }
 
 function shorten() {
     var url = parseUrl()
-    
+
     if (url) {
         $.ajax({
             url: "http://api.bitly.com/v3/shorten?login=" + birdcage.user.bitly_login + "&apiKey=" + birdcage.user.bitly_secret + "&longUrl=" + url,
             dataType: "jsonp",
-            success: function(result) {
+            success: function (result) {
                 var short_url = result["data"]["url"];
                 if (short_url)
                     replaceUrl(url, short_url)
@@ -137,15 +118,15 @@ function shorten() {
 }
 
 function parseUrl() {
-        var bitly_url_regexp = /http:\/\/bit.ly\/[^\s]+/;
-        var url_match = txtContent.val().match(/(http:\/\/|https:\/\/|www\.)[^\s]+/g);
+    var bitly_url_regexp = /http:\/\/bit.ly\/[^\s]+/;
+    var url_match = txtContent.val().match(/(http:\/\/|https:\/\/|www\.)[^\s]+/g);
 
-        for (var i in url_match) {
-            var url = url_match[i];
-            if (!url.match(bitly_url_regexp))
-                return url;
-        }
-        return null;
+    for (var i in url_match) {
+        var url = url_match[i];
+        if (!url.match(bitly_url_regexp))
+            return url;
+    }
+    return null;
 }
 
 function replaceUrl(url, short_url) {
@@ -153,12 +134,3 @@ function replaceUrl(url, short_url) {
     txtContent.val(shortened_text);
     updateLength();
 }
-
-function logout() {
-    ref.unauth();
-    loadPosts();
-}
-
-
-
-
