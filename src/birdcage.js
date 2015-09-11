@@ -77,7 +77,7 @@
 			content: text,
 			'.priority': Date.now(),
 			sent_count: 0
-		}
+		};
 		_firebase.child('posts/' + _authData.uid).push(tweet);
 	}
 

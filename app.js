@@ -31,6 +31,8 @@ btnTweet.on('click', tweet);
 chkActive.on('change', saveUserData);
 chkReshedule.on('change', saveUserData);
 nmbrInterval.on('blur', saveUserData);
+txtBitlyLogin.on('blur', saveUserData);
+txtBitlySecret.on('blur', saveUserData);
 txtContent.on('keyup', updateLength);
 txtContent.on('blur', contentChanged);
 btnRandomize.on('click', randomize);
@@ -116,7 +118,7 @@ function shorten() {
 
     if (url) {
         $.ajax({
-            url: "http://api.bitly.com/v3/shorten?login=" + birdcage.user.bitly_login + "&apiKey=" + birdcage.user.bitly_secret + "&longUrl=" + url,
+            url: "http://api.bitly.com/v3/shorten?login=" + birdcage2.getUser().bitly_login + "&apiKey=" + birdcage2.getUser().bitly_secret + "&longUrl=" + url,
             dataType: "jsonp",
             success: function (result) {
                 var short_url = result["data"]["url"];
