@@ -82,11 +82,19 @@
 	}
 
 	function increasePriority(tweet) {
-		var index = _tweets.indexOf(tweet);
-		if (index > 0) {
-			var prevPrio = _tweets[index - 1]['.priority'];
-			_firebase.child('posts/' + _authData.uid + '/' + tweet.id).update({ '.priority': prevPrio - 1 });
-		}
+
+        if (tweet['.priority'] <= 1){
+            // tweets with priority 1 are not scheduled
+            var highestPriority = _tweets[_tweets.length - 1 ]['.priority'];
+            _firebase.child('posts/' + _authData.uid + '/' + tweet.id).update({'.priority': highestPriority + 1});
+        }
+        else {
+            var index = _tweets.indexOf(tweet);
+            if (index > 0) {
+                var prevPrio = _tweets[index - 1]['.priority'];
+                _firebase.child('posts/' + _authData.uid + '/' + tweet.id).update({'.priority': prevPrio - 1});
+            }
+        }
 	}
 
 	function deleteTweetById(tweetId) {

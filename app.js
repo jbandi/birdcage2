@@ -48,6 +48,11 @@ function renderUserData() {
 
 function renderTweets(tweets) {
 
+    var scheduledTweets = tweets.filter(function(e){return e['.priority'] > 1});
+    var unscheduledTweets = tweets.filter(function(e){return e['.priority'] <= 1});
+
+    tweets = scheduledTweets.concat(unscheduledTweets);
+
     tweetList.empty();
     $.each(tweets, function (index, tweet) {
 
