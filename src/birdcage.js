@@ -6,6 +6,7 @@
 		_authData = {},
 		_user = undefined,
 		_tweets = [],
+        _firebaseListener = undefined,
 		_tweetSubject = new Rx.ReplaySubject();
 
 
@@ -13,13 +14,14 @@
 		init: init,
 		getAuthData: getAuthData,
 		getUser: getUser,
+        loadTweets: loadTweets,
 		updateUser: updateUser,
 		onTweetsChange: onTweetsChange,
 		postTweet: postTweet,
 		increasePriority: increasePriority,
 		deleteTweetById: deleteTweetById,
 		randomize: randomize
-	}
+	};
 
 	function init() {
 		return new Promise(function (resolve, reject) {
@@ -115,7 +117,7 @@
 						reshedule: false,
 						uid: _authData.uid,
 						username: _authData.twitter.username
-					}
+					};
 					ref.child('users/' + _authData.uid).set(_user, function () {
 						console.log("Loaded created!");
 						resolve();
@@ -129,20 +131,28 @@
 		});
 	}
 
-	function loadTweets() {
-		return new Promise(function (resolve, reject) {
-			_firebase.child("posts/" + _authData.uid)
-				.orderByPriority()
-				.startAt(2).on("value", function (snapshot) {
+	function loadTweets(all) {
+        //all = true;
+        _firebaseListener && _firebaseListener.off();
+        _firebaseListener = _firebase.child("posts/" + _authData.uid)
+                                .orderByPriority()
+                                .startAt(all ? 0 : 2);
+
+		return new Promise(function (resolve) {
+            _firebaseListener
+				.on("value", function (snapshot) {
 					_tweets = [];
 					var tweetsObj = snapshot.exportVal(); // also get priorities
 					if (tweetsObj){
 						var tweetsArray = $.map(tweetsObj, function (value, id) {
 							value.id = id;
 							return value;
-						})
+						});
+
+
+
 						_tweets = tweetsArray;
-					} 
+					}
 					resolve(); // resolving on any change ... not really elegant
 					_tweetSubject.onNext(_tweets);
 				});

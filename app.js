@@ -5,7 +5,6 @@ var ref = new Firebase("https://scorching-inferno-3523.firebaseio.com");
 
 
 var btnTweet = $('#tweet'),
-    btnRandomize = $('#randomize'),
     spnUsername = $('#username'),
     btnLogin = $('#login'),
     btnLogout = $('#logout'),
@@ -16,7 +15,9 @@ var btnTweet = $('#tweet'),
     txtBitlySecret = $('#bitly_secret'),
     txtContent = $('#content'),
     tweetList = $('#tweets'),
-    spnChars = $('#chars');
+    spnChars = $('#chars'),
+    btnRandomize = $('#randomize'),
+    chkShowAll = $('#showAll');
 
 
 birdcage2.init()
@@ -27,12 +28,13 @@ birdcage2.onTweetsChange(renderTweets);
 btnLogin.on('click', login);
 btnLogout.on('click', logout);
 btnTweet.on('click', tweet);
-btnRandomize.on('click', randomize);
 chkActive.on('change', saveUserData);
 chkReshedule.on('change', saveUserData);
 nmbrInterval.on('blur', saveUserData);
 txtContent.on('keyup', updateLength);
 txtContent.on('blur', contentChanged);
+btnRandomize.on('click', randomize);
+chkShowAll.on('change', loadTweets);
 
 function renderUserData() {
     var user = birdcage2.getUser();
@@ -45,8 +47,7 @@ function renderUserData() {
 }
 
 function renderTweets(tweets) {
-    // var tweets = birdcage2.getTweets();
-    
+
     tweetList.empty();
     $.each(tweets, function (index, tweet) {
 
@@ -81,6 +82,10 @@ function saveUserData() {
     };
 
     birdcage2.updateUser(userData)
+}
+
+function loadTweets(){
+    birdcage2.loadTweets(chkShowAll.prop('checked'));
 }
 
 function tweet() {
