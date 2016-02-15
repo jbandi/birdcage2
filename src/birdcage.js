@@ -19,6 +19,7 @@
 		onTweetsChange: onTweetsChange,
 		postTweet: postTweet,
 		increasePriority: increasePriority,
+		topPriority: topPriority,
 		deleteTweetById: deleteTweetById,
 		randomize: randomize
 	};
@@ -95,6 +96,12 @@
                 _firebase.child('posts/' + _authData.uid + '/' + tweet.id).update({'.priority': prevPrio - 1});
             }
         }
+	}
+
+	function topPriority(tweet) {
+
+		var highestPriority = _tweets[0]['.priority'];
+		_firebase.child('posts/' + _authData.uid + '/' + tweet.id).update({'.priority': highestPriority - 1});
 	}
 
 	function deleteTweetById(tweetId) {

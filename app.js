@@ -61,11 +61,18 @@ function renderTweets(tweets) {
         var li = $('<li>').html('(' + tweet['.priority'] + ') ' + Autolinker.link(tweet.content));
 
         if (index > 0) {
+
+            var topButton = $('<button>').text('top');
+            topButton.on('click', function () {
+                birdcage2.topPriority(tweet);
+            });
+
             var upButton = $('<button>').text('up');
             upButton.on('click', function () {
                 birdcage2.increasePriority(tweet);
             });
 
+            li.append(topButton);
             li.append(upButton);
         }
 
