@@ -1,6 +1,6 @@
 FIREBASE_BASE = 'https://scorching-inferno-3523.firebaseio.com';
 
-var ref = new Firebase("https://scorching-inferno-3523.firebaseio.com");
+// var ref = new Firebase("https://scorching-inferno-3523.firebaseio.com");
 
 
 
@@ -22,7 +22,7 @@ var btnTweet = $('#tweet'),
 
 birdcage2.init()
     .then(renderUserData);
-    
+
 birdcage2.onTweetsChange(renderTweets);
 
 btnLogin.on('click', login);
