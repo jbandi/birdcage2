@@ -40,41 +40,27 @@
 
             var provider = new firebase.auth.TwitterAuthProvider();
 
-            firebase.auth().signInWithPopup(provider)
-                .then(function (result) {
-                // This gives you a the Twitter OAuth 1.0 Access Token and Secret.
-                // You can use these server side with your app's credentials to access the Twitter API.
-                var token = result.credential.accessToken;
-                var secret = result.credential.secret;
-                // The signed-in user info.
-                var user = result.user;
+            firebase.auth().getRedirectResult().then(function (result) {
+                if (result.credential) {
+                    console.log('LOGIN');
 
-                console.log("Authenticated successfully with payload:", token, secret, user);
-                _authData = user;
-                loadData();
-            }).catch(function (error) {
-                console.log(error);
-            });
+                    var token = result.credential.accessToken;
+                    var secret = result.credential.secret;
+                    // The signed-in user info.
+                    var user = result.user;
 
+                    console.log("Authenticated successfully with payload:", token, secret, user);
+                    _authData = user;
+                    loadData();
 
-            // _authData = ref.getAuth();
-            // if (!_authData) {
-            // 	ref.authWithOAuthPopup("twitter", function (error, authData) {
-            // 	// ref.authWithOAuthRedirect("twitter", function (error, authData) {
-            // 		if (error) {
-            // 			console.log("Login Failed!", error);
-            // 		}
-            // 		else {
-            // 			console.log("Authenticated successfully with payload:", authData)
-            // 			_authData = authData;
-            // 			loadData();
-            // 		}
-            //
-            // 	});
-            // }
-            // else {
-            // 	loadData();
-            // }
+                } else {
+                    console.log('NOT LOGIN');
+                    firebase.auth().signInWithRedirect(provider);
+                }
+            })
+                .catch(function (error) {
+                    console.log(error);
+                });
 
             function loadData() {
                 var userPromise = createOrLoadUser();
@@ -151,7 +137,6 @@
     function createOrLoadUser() {
 
         return new Promise(function (resolve, reject) {
-            debugger;
             _firebase.database().ref("users/" + _authData.uid).once("value", function (snapshot) {
 
                 _user = snapshot.val();
