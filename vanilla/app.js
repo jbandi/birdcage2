@@ -22,6 +22,7 @@ var btnTweet = $('#tweet'),
 
 birdcage2.init()
     .then(renderUserData);
+updateLength();
 
 birdcage2.onTweetsChange(renderTweets);
 
