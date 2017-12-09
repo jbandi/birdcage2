@@ -116,7 +116,7 @@ function contentChanged() {
 }
 
 function updateLength() {
-    var remaining = 140 - txtContent.val().length;
+    var remaining = 280 - txtContent.val().length;
     spnChars.text(remaining);
 }
 
